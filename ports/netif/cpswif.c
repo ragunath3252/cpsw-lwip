@@ -180,12 +180,12 @@
 /**
  * RX thread stack size.
  */
-#define RX_THREAD_STACKSIZE 512
+#define RX_THREAD_STACKSIZE 2048
 
  /**
  * RX thread stack size.
  */
-#define TX_THREAD_STACKSIZE 512
+#define TX_THREAD_STACKSIZE 2048
 
 static void rx_thread_function(void* arg);
 static void tx_thread_function(void* arg);
@@ -2227,6 +2227,7 @@ sem_t *const rxsem = &cpswinst->rxsem;
 while (1) {
         sem_wait(rxsem);
         process_input(inst_num, netif);
+	sched_yield();
     }
 }
 
@@ -2330,6 +2331,7 @@ while (1) {
         sys_mutex_lock(txmtx);
         process_tx_end(inst_num);
         sys_mutex_unlock(txmtx);
+	sched_yield();
     }
 }
 

@@ -102,6 +102,8 @@ static inline void dhcpCheck(volatile unsigned char * const state)
     /* Check for DHCP completion for 'cnt' number of times, each 10ms */
     while( cnt-- && *state != DHCP_BOUND)
     {
+	if(cnt % 2 == 0)
+               sched_yield();
         delay(10);
     }
 }
@@ -229,6 +231,7 @@ static bool lwIPInit(LWIP_IF *const lwipIf, const unsigned int ifNum)
             netif_set_default(&cpswNetIF[ifNum]);
             lwipInitFlag = LWIP_INITIALIZED;
         }
+	lwipIf->ipMode = IPADDR_USE_DHCP;
         ret = netifStart(lwipIf, ifNum);
     }
     else

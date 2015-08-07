@@ -2,34 +2,20 @@ include $(RTEMS_MAKEFILE_PATH)/Makefile.inc
 include $(RTEMS_CUSTOM)
 include $(PROJECT_ROOT)/make/leaf.cfg
 
-INSTALL_DIR=/home/ragu/build_tools/rtems_latest/arm-rtems4.11/beagleboneblack/lib/include/lwip
 
 #### CONFIG ####################################################################
-
+#For debugging symbols add -DLWIP_DEBUG 
 # COMPILER/LINKER
-CFLAGS+=-g -O0
-#-Werror -Wpedantic -Wall -Wextra -Wdouble-promotion -Winit-self \
-#    -Wmissing-include-dirs -Wswitch-default -Wunused \
-#    -Wmissing-format-attribute -Wtrampolines -Wfloat-equal \
-#    -Wdeclaration-after-statement -Wshadow -Wunsafe-loop-optimizations \
-#    -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings \
-#    -Wclobbered -Wjump-misses-init -Wlogical-op -Waggregate-return \
- #   -Wredundant-decls -Wnested-externs -Winvalid-pch -Wlong-long \
-  #  -Wvariadic-macros -Wvarargs -Woverlength-strings -Wunsuffixed-float-constants \
-   # -Wno-address -DIPv4 -DTARGET_LPC1768
-#ifeq ($(LWIP_DEBUG), 1)
-    CFLAGS+=-DLWIP_DEBUG
-#endif # LWIP_DEBUG
-LDFLAGS+=-fwhole-program -Wl,--gc-sections -fno-exceptions
+CFLAGS+=-g -O2   \
+ -Wall
 
 # OUTPUT
-LWIP_EXEC=lwip
-
+LWIP_EXEC=lwipdrv
 
 #### PATHS #####################################################################
 
 # LWIP
-LWIP_PATH=..
+LWIP_PATH=.
 LWIP_SRC_PATH=$(LWIP_PATH)/src
 LWIP_API_PATH=$(LWIP_SRC_PATH)/api
 LWIP_CORE_PATH=$(LWIP_SRC_PATH)/core
@@ -37,82 +23,53 @@ LWIP_INCL_PATH=$(LWIP_SRC_PATH)/include
 LWIP_NETIF_PATH=$(LWIP_SRC_PATH)/netif
 
 # ARCH
-LWIPARCH_PATH=ports
+LWIPARCH_PATH=$(LWIP_PATH)/ports
 LWIPARCH_SRC_PATH=$(LWIPARCH_PATH)
 LWIPARCH_INCL_PATH=$(LWIPARCH_PATH)/include
 
 # DRIVER
-LWIPDRIVER_PATH=ports
+LWIPDRIVER_PATH=$(LWIP_PATH)/ports
 LWIPDRIVER_SRC_PATH=$(LWIPDRIVER_PATH)/netif
 LWIPDRIVER_INCL_PATH=$(LWIPDRIVER_PATH)/include/netif
-
-# APP
-LWIPAPP_PATH=../lwip_app_posix
-LWIPAPP_SRC_PATH=$(LWIPAPP_PATH)/src
-LWIPAPP_INCL_PATH=$(LWIPAPP_PATH)/include
-
 
 #### SOURCES ###################################################################
 
 ## CORE
-CORE_SRC=$(LWIP_CORE_PATH)/dhcp.c $(LWIP_CORE_PATH)/dns.c \
-    $(LWIP_CORE_PATH)/inet_chksum.c $(LWIP_CORE_PATH)/init.c \
-    $(LWIP_CORE_PATH)/mem.c $(LWIP_CORE_PATH)/memp.c $(LWIP_CORE_PATH)/netif.c \
-    $(LWIP_CORE_PATH)/pbuf.c $(LWIP_CORE_PATH)/raw.c $(LWIP_CORE_PATH)/stats.c \
-    $(LWIP_CORE_PATH)/sys.c $(LWIP_CORE_PATH)/tcp_in.c \
-    $(LWIP_CORE_PATH)/tcp_out.c $(LWIP_CORE_PATH)/tcp.c \
-    $(LWIP_CORE_PATH)/timers.c $(LWIP_CORE_PATH)/udp.c $(LWIP_CORE_PATH)/def.c
+CORE_SRC=$(wildcard $(LWIP_CORE_PATH)/*.c)
 
 ## IPv4
-IPV4_SRC=$(LWIP_CORE_PATH)/ipv4/autoip.c $(LWIP_CORE_PATH)/ipv4/icmp.c \
-    $(LWIP_CORE_PATH)/ipv4/igmp.c $(LWIP_CORE_PATH)/ipv4/ip_frag.c \
-    $(LWIP_CORE_PATH)/ipv4/ip4_addr.c $(LWIP_CORE_PATH)/ipv4/ip4.c
+IPV4_SRC=$(wildcard $(LWIP_CORE_PATH)/ipv4/*.c)
 
 ## IPv6
-IPV6_SRC=$(LWIP_CORE_PATH)/ipv6/dhcp6.c $(LWIP_CORE_PATH)/ipv6/ethip6.c \
-    $(LWIP_CORE_PATH)/ipv6/icmp6.c $(LWIP_CORE_PATH)/ipv6/inet6.c \
-    $(LWIP_CORE_PATH)/ipv6/ip6_addr.c $(LWIP_CORE_PATH)/ipv6/ip6_frag.c \
-    $(LWIP_CORE_PATH)/ipv6/ip6.c $(LWIP_CORE_PATH)/ipv6/mld6.c \
-    $(LWIP_CORE_PATH)/ipv6/nd6.c
+IPV6_SRC=$(wildcard $(LWIP_CORE_PATH)/ipv6/*.c)
 
 ## SNMP
-SNMP_SRC=$(LWIP_CORE_PATH)/snmp/asn1_dec.c $(LWIP_CORE_PATH)/snmp/asn1_enc.c \
-    $(LWIP_CORE_PATH)/snmp/mib_structs.c $(LWIP_CORE_PATH)/snmp/mib2.c \
-    $(LWIP_CORE_PATH)/snmp/msg_in.c $(LWIP_CORE_PATH)/snmp/msg_out.c
+SNMP_SRC=$(wildcard $(LWIP_CORE_PATH)/snmp/*.c)
 
 ## API
-API_SRC=$(LWIP_API_PATH)/api_lib.c $(LWIP_API_PATH)/api_msg.c \
-    $(LWIP_API_PATH)/err.c $(LWIP_API_PATH)/netbuf.c $(LWIP_API_PATH)/netdb.c \
-    $(LWIP_API_PATH)/netifapi.c $(LWIP_API_PATH)/tcpip.c $(LWIP_API_PATH)/sockets.c #$(LWIP_API_PATH)/pppapi.c \
-    $(LWIP_API_PATH)/sockets.c $(LWIP_API_PATH)/tcpip.c
+API_SRC=$(wildcard $(LWIP_API_PATH)/*.c )
 
 ## NETIF
-NETIF_SRC=$(LWIP_NETIF_PATH)/etharp.c
+NETIF_SRC=$(wildcard $(LWIP_NETIF_PATH)/*.c) \
+          $(wildcard $(LWIP_NETIF_PATH)/ppp/*.c) \
+          $(wildcard $(LWIP_NETIF_PATH)/ppp/polarssl/*.c)
 
-## ARCH
-##ARCH_SRC= $(LWIPARCH_SRC_PATH)/lwip_chksum.c $(LWIPARCH_SRC_PATH)/perf.c \
- #   $(LWIPARCH_SRC_PATH)/sys_arch.c
 
-ARCH_SRC= $(LWIPARCH_SRC_PATH)/perf.c $(LWIPARCH_SRC_PATH)/sys_arch.c \
-	$(LWIPARCH_SRC_PATH)/locator.c $(LWIPARCH_SRC_PATH)/lwiplib.c
+ARCH_SRC= $(wildcard $(LWIPARCH_SRC_PATH)/*.c)
 
 # DRIVER
-DRIVER_SRC=$(LWIPDRIVER_SRC_PATH)/cpsw.c $(LWIPDRIVER_SRC_PATH)/cpswif.c\
-	$(LWIPDRIVER_SRC_PATH)/mdio.c $(LWIPDRIVER_SRC_PATH)/phy.c \
-	$(LWIPDRIVER_SRC_PATH)/cpsw_bb.c $(LWIPDRIVER_SRC_PATH)/cache.c \
-	$(LWIPDRIVER_SRC_PATH)/cp15.S $(LWIPDRIVER_SRC_PATH)/mmu.c
-    #$(LWIPDRIVER_SRC_PATH)/cpswif.c
-    #$(LWIPDRIVER_SRC_PATH)/lpc_phy_dp83848.c
+DRIVER_SRC=$(wildcard $(LWIPDRIVER_SRC_PATH)/*.c ) \
+	$(wildcard $(LWIPDRIVER_SRC_PATH)/*.S )
 
-## APP
-##APP_SRC=$(LWIPAPP_SRC_PATH)/lwip_rtems_tcp_echo_test.c \
-  ##  $(LWIPAPP_SRC_PATH)/main.c
+LARCH_SRC= $(wildcard $(LWIPARCH_ATH)/*.c)
 
-## SOURCES
-#SOURCES=$(CORE_SRC) $(IPV4_SRC) $(API_SRC) $(NETIF_SRC) $(ARCH_SRC) \
-#    $(DRIVER_SRC) $(APP_SRC) ../main.c  ../enetEcho.c ../echod.c ../delay.c
-#SOURCES = $(LWIPARCH_SRC_PATH)/lwiplib.c $(DRIVER_SRC) 
-SOURCES = $(LWIPARCH_SRC_PATH)/lwiplib.c $(LWIPARCH_SRC_PATH)/delay.c $(DRIVER_SRC)
+# DRIVER
+LDRIVER_SRC=$(wildcard $(LWIPARCH_ATH)/*.c ) \
+        $(wildcard $(LWIPARCH_ATH)/*.S )
+
+
+SOURCES =  $(DRIVER_SRC) $(ARCH_SRC) $(LARCH_SRC) $(LDRIVER_SRC)
+
 
 #### HEADERS ###################################################################
 
@@ -120,13 +77,22 @@ SOURCES = $(LWIPARCH_SRC_PATH)/lwiplib.c $(LWIPARCH_SRC_PATH)/delay.c $(DRIVER_S
 CORE_H=$(LWIP_INCL_PATH)
 
 ## IPv4
-IPV4_H=$(LWIP_INCL_PATH)/ipv4
+#IPV4_H=$(LWIP_INCL_PATH)/ipv4
 
 ## IPv6
-IPV6_H=$(LWIP_INCL_PATH)/ipv6
+#IPV6_H=$(LWIP_INCL_PATH)/ipv6
+
+## POSIX
+POSIX_H=$(LWIP_INCL_PATH)/posix
+
+##POSIX_SYS
+POSIX_SYS_H=$(LWIP_INCL_PATH)/posix/sys
+
 
 ## NETIF
 NETIF_H=$(LWIP_INCL_PATH)/netif
+NETIF_H_PPP=$(LWIP_INCL_PATH)/netif/ppp
+NETIF_H_PPP_POLARSSL=$(LWIP_INCL_PATH)/netif/ppp/polarssl
 
 ## ARCH
 ARCH_H=$(LWIPARCH_INCL_PATH)
@@ -134,54 +100,69 @@ ARCH_H=$(LWIPARCH_INCL_PATH)
 ## DRIVER
 DRIVER_H=$(LWIPDRIVER_INCL_PATH)
 
-## APP
-APP_H=..
-
 # HEADERS
-HEADERS=-I$(CORE_H) -I$(IPV4_H) -I$(IPV6_H) -I$(NETIF_H) -I$(ARCH_H) \
-    -I$(DRIVER_H) -I$(APP_H) -I/home/ragu/build_tools/rtems_latest/arm-rtems4.11/beagleboneblack/lib/include/lwip/include
+HEADERS=-I$(CORE_H) -I$(POSIX_H) -I$(POSIX_SYS_H) -I$(NETIF_H) \
+        -I$(NETIF_H_PPP) -I$(NETIF_H_PPP_POLARSSL) -I$(ARCH_H) \
+        -I$(DRIVER_H) -I$(RTEMS_MAKEFILE_PATH)/lwip/include
 
 
 ################################################################################
 
 
 BIN=${ARCH}/$(LWIP_EXEC).bin
-EXEC=$(LWIP_EXEC).exe
-PGM=${ARCH}/$(EXEC)
-LIB=${ARCH}/libdrv$(LWIP_EXEC).a
+LIB=${ARCH}/lib$(LWIP_EXEC).a
 
 # optional managers required
 MANAGERS=all
 
 # C source names
-CSRCS=$(notdir $(SOURCES))
-COBJS=$(patsubst %.c,${ARCH}/%.o,$(CSRCS))
+CSRCS=$(filter %.c ,$(SOURCES))
+COBJS=$(patsubst %.c,${ARCH}/%.o,$(notdir $(CSRCS)))
 
 ASMSRCS=$(filter %.S , $(SOURCES))
 ASMOBJS=$(patsubst %.S,${ARCH}/%.o,$(notdir $(ASMSRCS)))
 
 OBJS=$(COBJS) $(ASMOBJS)
 
-copy:
-	$(foreach FILE, $(SOURCES), cp $(FILE) $(notdir $(FILE)) ; )
-
-all: copy ${ARCH} $(LIB)
+all:${ARCH} $(LIB)
 
 $(LIB): $(OBJS)
 	$(AR)  rcs  $@ $^
 
-#${ARCH}/%.o: ./%.c
-#	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+${ARCH}/%.o: $(LWIP_CORE_PATH)/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
 
-#${ARCH}/%.o: ./%.S
-#	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+${ARCH}/%.o: $(LWIP_CORE_PATH)/ipv4/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
 
-$(PGM): $(OBJS)
-	$(AR)  rcs  $@ $^
-#	$(make-exe)
+${ARCH}/%.o: $(LWIP_CORE_PATH)/ipv6/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
 
-$(BIN): $(PGM)
-#	$(OBJCOPY) -O binary $^ $@
+${ARCH}/%.o: $(LWIP_CORE_PATH)/snmp/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIP_API_PATH)/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIP_NETIF_PATH)/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIP_NETIF_PATH)/ppp/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIP_NETIF_PATH)/ppp/polarssl/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIPARCH_SRC_PATH)/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIPDRIVER_SRC_PATH)/%.S
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+${ARCH}/%.o: $(LWIPDRIVER_SRC_PATH)/%.c
+	${COMPILE.c} $(AM_CPPFLAGS) $(AM_CXXFLAGS) -o $@ $<
+
+INSTALL_DIR=$(RTEMS_MAKEFILE_PATH)/lwip
 
 install:
 	mkdir -p $(INSTALL_DIR)/include
@@ -194,10 +175,5 @@ install:
 	cp  $(LWIPARCH_INCL_PATH)/beaglebone.h $(INSTALL_DIR)/include
 	cp  $(LWIPARCH_INCL_PATH)/cache.h $(INSTALL_DIR)/include
 	cp  $(LWIPARCH_INCL_PATH)/mmu.h $(INSTALL_DIR)/include
-	
-
 
 CPPFLAGS+=$(HEADERS)
-
-cleanall: clean
-	rm -f *.c

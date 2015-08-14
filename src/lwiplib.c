@@ -231,7 +231,7 @@ static bool lwIPInit(LWIP_IF *const lwipIf, const unsigned int ifNum)
             netif_set_default(&cpswNetIF[ifNum]);
             lwipInitFlag = LWIP_INITIALIZED;
         }
-	lwipIf->ipMode = IPADDR_USE_DHCP;
+	//lwipIf->ipMode = IPADDR_USE_DHCP;
         ret = netifStart(lwipIf, ifNum);
     }
     else
